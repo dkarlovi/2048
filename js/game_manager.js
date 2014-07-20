@@ -8,6 +8,8 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
 
   this.inputManager.on("move", this.move.bind(this));
   this.inputManager.on("restart", this.restart.bind(this));
+  this.inputManager.on("save", this.save.bind(this));
+  this.inputManager.on("load", this.load.bind(this));
   this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
 
   this.setup();
@@ -18,6 +20,20 @@ GameManager.prototype.restart = function () {
   this.storageManager.clearGameState();
   this.actuator.continueGame(); // Clear the game won/lost message
   this.setup();
+};
+
+// save the game
+GameManager.prototype.save = function () {
+    console.log('save here');
+    this.storageManager.saveGameState(this.serialize());
+    alert('Saved');
+};
+
+// load a saved game game
+GameManager.prototype.load = function () {
+    console.log('load here');
+    this.actuator.continueGame(); // Clear the game won/lost message
+    this.setup(true);
 };
 
 // Keep playing after winning (allows going over 2048)
@@ -36,8 +52,13 @@ GameManager.prototype.isGameTerminated = function () {
 };
 
 // Set up the game
-GameManager.prototype.setup = function () {
-  var previousState = this.storageManager.getGameState();
+GameManager.prototype.setup = function (saved) {
+  var previousState;
+  if (saved) {
+    previousState = this.storageManager.getSavedGameState();
+  } else {
+    previousState = this.storageManager.getGameState();
+  }
 
   // Reload the game from a previous game if present
   if (previousState) {
